@@ -10,7 +10,7 @@ The goal is to create an employee tracker. The user will be met with questions i
 * Created if statements to add what the user selects too and then they will be prompted with another question to add items about what they select then itll be inserted into the db
 * Created if to update employee role and then a list of the employees will be shown, once an employee is selected they will be prompted again what they want to update the role too and then the role will be updated in the db
 
-![Image of the view all departments table]()
+![Image of the view all employees table](https://github.com/nathan26036/employee-tracker/blob/main/assets/employee-tracker.PNG)
   
 ## Installation 
 The final code tutorial can be found at https://drive.google.com/file/d/1vJbvIiUsydS9f_PdKeLyhl6CUn6YuQDQ/view?usp=sharing
