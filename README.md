@@ -13,4 +13,4 @@ The goal is to create an employee tracker. The user will be met with questions i
 ![Image of the view all departments table]()
   
 ## Installation 
-The final code tutorial can be found at 
+The final code tutorial can be found at https://drive.google.com/file/d/1vJbvIiUsydS9f_PdKeLyhl6CUn6YuQDQ/view?usp=sharing
