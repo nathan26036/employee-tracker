@@ -1,6 +1,6 @@
 const express = require('express');
-const inquirer = require('inquirer');
-const sequelize = require('./config/connection');
+const inquirer = require('inquirer')
+const mysql = require('mysql2');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -9,10 +9,18 @@ const app = express();
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-sequelize.sync({ force: false }).then(() => {
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-});
-;
+const db = mysql.createConnection(
+    {
+      host: 'localhost',
+      // MySQL username,
+      user: 'root',
+      // MySQL password
+      password: 'MySQLpass',
+      database: 'company_db'
+    },
+
+    console.log(`Connected to the company_db database.`)
+  );
 
 var employee_tracker = function () {
   inquirer.prompt([{
@@ -24,21 +32,21 @@ var employee_tracker = function () {
   }]).then((answers) => {
       // Views the Department Table in the Database
       if (answers.prompt === 'View All Department') {
-        sequelize.query(`SELECT * FROM department`, (err, result) => {
+        db.query(`SELECT * FROM department`, (err, result) => {
               if (err) throw err;
               console.log("Viewing All Departments: ");
               console.table(result);
               employee_tracker();
           });
       } else if (answers.prompt === 'View All Roles') {
-        sequelize.query(`SELECT * FROM role`, (err, result) => {
+        db.query(`SELECT * FROM role`, (err, result) => {
               if (err) throw err;
               console.log("Viewing All Roles: ");
               console.table(result);
               employee_tracker();
           });
       } else if (answers.prompt === 'View All Employees') {
-        sequelize.query(`SELECT * FROM employee`, (err, result) => {
+        db.query(`SELECT * FROM employee`, (err, result) => {
               if (err) throw err;
               console.log("Viewing All Employees: ");
               console.table(result);
@@ -49,7 +57,7 @@ var employee_tracker = function () {
               // Adding a Department
               type: 'input',
               name: 'department',
-              message: 'What is the name of the dpeartment?',
+              message: 'What is the name of the department?',
               validate: departmentInput => {
                   if (departmentInput) {
                       return true;
@@ -59,7 +67,7 @@ var employee_tracker = function () {
                   }
               }
           }]).then((answers) => {
-            sequelize.query(`INSERT INTO department (name) VALUES (?)`, [answers.department], (err, result) => {
+            db.query(`INSERT INTO department (name) VALUES (?)`, [answers.department], (err, result) => {
                   if (err) throw err;
                   console.log(`Added ${answers.department} to the database.`)
                   employee_tracker();
@@ -67,7 +75,7 @@ var employee_tracker = function () {
           })
       } else if (answers.prompt === 'Add A Role') {
           // Beginning with the database so that we may acquire the departments for the choice
-          sequelize.query(`SELECT * FROM department`, (err, result) => {
+          db.query(`SELECT * FROM department`, (err, result) => {
               if (err) throw err;
 
               inquirer.prompt([
@@ -120,7 +128,7 @@ var employee_tracker = function () {
                       }
                   }
 
-                  sequelize.query(`INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`, [answers.role, answers.salary, department.id], (err, result) => {
+                  db.query(`INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)`, [answers.role, answers.salary, department.id], (err, result) => {
                       if (err) throw err;
                       console.log(`Added ${answers.role} to the database.`)
                       employee_tracker();
@@ -129,7 +137,7 @@ var employee_tracker = function () {
           });
       } else if (answers.prompt === 'Add An Employee') {
           // Calling the database to acquire the roles and managers
-          sequelize.query(`SELECT * FROM employee, role`, (err, result) => {
+          db.query(`SELECT * FROM employee, role`, (err, result) => {
               if (err) throw err;
 
               inquirer.prompt([
@@ -197,7 +205,7 @@ var employee_tracker = function () {
                       }
                   }
 
-                  sequelize.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`, [answers.firstName, answers.lastName, role.id, answers.manager.id], (err, result) => {
+                  db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`, [answers.firstName, answers.lastName, role.id, answers.manager.id], (err, result) => {
                       if (err) throw err;
                       console.log(`Added ${answers.firstName} ${answers.lastName} to the database.`)
                       employee_tracker();
@@ -206,7 +214,7 @@ var employee_tracker = function () {
           });
       } else if (answers.prompt === 'Update An Employee Role') {
           // Calling the database to acquire the roles and managers
-          sequelize.query(`SELECT * FROM employee, role`, (err, result) => {
+          db.query(`SELECT * FROM employee, role`, (err, result) => {
               if (err) throw err;
 
               inquirer.prompt([
@@ -252,7 +260,7 @@ var employee_tracker = function () {
                       }
                   }
 
-                  sequelize.query(`UPDATE employee SET ? WHERE ?`, [{role_id: role}, {last_name: name}], (err, result) => {
+                  db.query(`UPDATE employee SET ? WHERE ?`, [{role_id: role}, {last_name: name}], (err, result) => {
                       if (err) throw err;
                       console.log(`Updated ${answers.employee} role to the database.`)
                       employee_tracker();
@@ -260,9 +268,9 @@ var employee_tracker = function () {
               })
           });
       } else if (answers.prompt === 'Log Out') {
-        sequelize.end();
+        db.end();
           console.log("Good-Bye!");
       }
   })
 };
-employee_tracker()
+employee_tracker();
